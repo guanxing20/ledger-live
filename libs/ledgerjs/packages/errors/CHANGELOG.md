@@ -1,5 +1,29 @@
 # @ledgerhq/errors
 
+## 6.23.0
+
+### Minor Changes
+
+- [#10891](https://github.com/LedgerHQ/ledger-live/pull/10891) [`20406e5`](https://github.com/LedgerHQ/ledger-live/commit/20406e52b4167289fced610c6ca9824a6d68cdac) Thanks [@semeano](https://github.com/semeano)! - Staking for Aptos
+
+## 6.23.0-next.0
+
+### Minor Changes
+
+- [#10891](https://github.com/LedgerHQ/ledger-live/pull/10891) [`20406e5`](https://github.com/LedgerHQ/ledger-live/commit/20406e52b4167289fced610c6ca9824a6d68cdac) Thanks [@semeano](https://github.com/semeano)! - Staking for Aptos
+
+## 6.22.0
+
+### Minor Changes
+
+- [#10493](https://github.com/LedgerHQ/ledger-live/pull/10493) [`b5e3217`](https://github.com/LedgerHQ/ledger-live/commit/b5e321789d3a6f9cb1916067790590640db0876f) Thanks [@CremaFR](https://github.com/CremaFR)! - feat: catching missing address to better understand swap errors
+
+## 6.22.0-next.0
+
+### Minor Changes
+
+- [#10493](https://github.com/LedgerHQ/ledger-live/pull/10493) [`b5e3217`](https://github.com/LedgerHQ/ledger-live/commit/b5e321789d3a6f9cb1916067790590640db0876f) Thanks [@CremaFR](https://github.com/CremaFR)! - feat: catching missing address to better understand swap errors
+
 ## 6.21.0
 
 ### Minor Changes

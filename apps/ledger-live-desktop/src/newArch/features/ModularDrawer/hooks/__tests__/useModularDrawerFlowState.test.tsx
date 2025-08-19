@@ -1,7 +1,7 @@
-import { useModularDrawerFlowState } from "../useModularDrawerFlowState";
-import { bitcoinCurrency, ethereumCurrency } from "../../__mocks__/useSelectAssetFlow.mock";
-import { renderHook } from "tests/testSetup";
 import { act } from "react-dom/test-utils";
+import { renderHook } from "tests/testSetup";
+import { bitcoinCurrency, ethereumCurrency } from "../../../__mocks__/useSelectAssetFlow.mock";
+import { useModularDrawerFlowState } from "../useModularDrawerFlowState";
 
 const mockGoToStep = jest.fn();
 const mockSetNetworksToDisplay = jest.fn();
@@ -11,6 +11,7 @@ const mockOnAccountSelected = jest.fn();
 const defaultProps = {
   currenciesByProvider: [],
   assetsToDisplay: [ethereumCurrency, bitcoinCurrency],
+  sortedCryptoCurrencies: [bitcoinCurrency, ethereumCurrency],
   setNetworksToDisplay: mockSetNetworksToDisplay,
   currenciesIdsArray: ["bitcoin", "ethereum"],
   goToStep: mockGoToStep,

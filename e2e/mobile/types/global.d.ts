@@ -20,7 +20,7 @@ import { Transaction as TransactionType } from "@ledgerhq/live-common/e2e/models
 import { Fee as FeeType } from "@ledgerhq/live-common/e2e/enum/Fee";
 import { AppInfos as AppInfosType } from "@ledgerhq/live-common/e2e/enum/AppInfos";
 import { Swap as SwapType } from "@ledgerhq/live-common/e2e/models/Swap";
-import { CLI as CLIType } from "./utils/cliUtils";
+import { CLI as CLIType } from "../utils/cliUtils";
 
 declare global {
   var IS_FAILED: boolean;
@@ -80,4 +80,6 @@ declare global {
   var waitWebElementByTestId: typeof WebElementHelpers.waitWebElementByTestId;
   var tapWebElementByTestId: typeof WebElementHelpers.tapWebElementByTestId;
   var typeTextByWebTestId: typeof WebElementHelpers.typeTextByWebTestId;
+  var getValueByWebTestId: typeof WebElementHelpers.getValueByWebTestId;
+  var tapWebElementByElement: typeof WebElementHelpers.tapWebElementByElement;
 }

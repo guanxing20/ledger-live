@@ -8,6 +8,7 @@ import { Provider } from "@ledgerhq/live-common/e2e/enum/Provider";
 import { OperationType } from "@ledgerhq/live-common/e2e/enum/OperationType";
 import { doubleDecodeGoToURL } from "../utils/urlUtils";
 import { getAccountAddressesFromAppJson } from "../utils/getAccountAddressesUtils";
+import { waitFor } from "../utils/waitFor";
 
 interface ProviderConfig {
   buyParams: Record<string, (buySell: BuySell) => string | number>;
@@ -35,8 +36,15 @@ export class BuyAndSellPage extends WebViewAppPage {
   private fiatDrawer = "open-fiat-drawer";
   private fiatDrawerInput = "fiat-drawer-search-input";
   private saveRegionFiatOptionsSelector = "save-region-and-fiat-options";
+  private showMoreQuotes = "SHOW MORE QUOTES";
 
   private chooseAssetDrawer = new ChooseAssetDrawer(this.page);
+
+  private standardSellParams: Record<string, (buySell: BuySell) => string | number> = {
+    cryptoAmount: buySell => buySell.amount,
+    cryptoCurrency: buySell => buySell.crypto.currency.ticker,
+    fiatCurrency: buySell => buySell.fiat.currencyTicker,
+  };
 
   private providerConfigs: Record<string, ProviderConfig> = {
     [Provider.MOONPAY.uiName]: {
@@ -45,11 +53,16 @@ export class BuyAndSellPage extends WebViewAppPage {
         currencyCode: buySell => buySell.crypto.currency.ticker,
         baseCurrencyCode: buySell => buySell.fiat.currencyTicker,
       },
-      sellParams: {
-        cryptoAmount: buySell => buySell.amount,
-        cryptoCurrency: buySell => buySell.crypto.currency.ticker,
+      sellParams: this.standardSellParams,
+      addressParam: "walletaddress",
+    },
+    [Provider.TRANSAK.uiName]: {
+      buyParams: {
+        fiatAmount: buySell => buySell.amount,
+        cryptoCurrencyCode: buySell => buySell.crypto.currency.ticker,
         fiatCurrency: buySell => buySell.fiat.currencyTicker,
       },
+      sellParams: this.standardSellParams,
       addressParam: "walletaddress",
     },
     [Provider.COINBASE.uiName]: {
@@ -58,11 +71,7 @@ export class BuyAndSellPage extends WebViewAppPage {
         defaultAsset: buySell => buySell.crypto.currency.ticker,
         fiatCurrency: buySell => buySell.fiat.currencyTicker,
       },
-      sellParams: {
-        cryptoAmount: buySell => buySell.amount,
-        cryptoCurrency: buySell => buySell.crypto.currency.ticker,
-        fiatCurrency: buySell => buySell.fiat.currencyTicker,
-      },
+      sellParams: this.standardSellParams,
       addressParam: "destinationwallets",
       parseAddress: (value: string) => {
         const wallets = JSON.parse(decodeURIComponent(value)) as Array<{
@@ -176,6 +185,9 @@ export class BuyAndSellPage extends WebViewAppPage {
 
   @step("Select provider quote for $1")
   async selectProviderQuote(operation: string, providerName: string) {
+    if (await this.isTextVisible(this.showMoreQuotes)) {
+      await this.clickElementByText(this.showMoreQuotes);
+    }
     await this.clickElement(this.provider(providerName));
     await this.verifyElementText(this.formCta, `${operation} with ${providerName}`);
   }
@@ -188,7 +200,15 @@ export class BuyAndSellPage extends WebViewAppPage {
 
   @step("Verify provider URL for $0")
   async verifyProviderUrl(providerName: string, buySell: BuySell, userdataDestinationPath: string) {
-    const rawUrl = await this.getUrl();
+    await waitFor(
+      async () => this.webviewUrlHistory.some(url => url.toLowerCase().includes("gotourl")),
+      2_00,
+      10_000,
+    );
+    const rawUrl = this.webviewUrlHistory.find(url => url.toLowerCase().includes("gotourl"));
+    if (!rawUrl) {
+      throw new Error("No URL with 'gotourl' found in webviewUrlHistory after waiting.");
+    }
     const normalizedUrl = rawUrl.toLowerCase();
 
     this.verifyBasicUrlIncludes(normalizedUrl, providerName, buySell.operation);

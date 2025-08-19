@@ -1,7 +1,6 @@
 import { Deserializer, Hex, Network, RawTransaction } from "@aptos-labs/ts-sdk";
 import { createApi } from "../../api";
 import { getEnv } from "@ledgerhq/live-env";
-import type { AptosSender } from "../../types/assets";
 import { DEFAULT_GAS, DEFAULT_GAS_PRICE } from "../../constants";
 
 describe("createApi", () => {
@@ -15,17 +14,17 @@ describe("createApi", () => {
   const assetTypeNative = "native";
   const assetTypeToken = "token";
 
-  const sender: AptosSender = {
+  const sender = {
     xpub: "0x934887885b27a0407bf8a5e0bbc6b6371254bea94de5510e948bcc92dc0a519b",
     freshAddress: "0x0ef3b40f6ecd5583218d1985e0d54b54e8785ad2ec2d27ed1720ec16bb11686f",
   };
 
-  const recipient: AptosSender = {
+  const recipient = {
     xpub: "0x7fd6bfaac17c2c763f624b1f95cd4911e3646a5b777b03cc24f93ed0ac3f3e2b",
     freshAddress: "0x4859a161dfe13081cf5a5eac409cd38f707c06176a21ddc875260c2ce63f3a28",
   };
 
-  const tokenAccount: AptosSender = {
+  const tokenAccount = {
     xpub: "0xeacada8192f15185637e475d7783e14486e232d8b9978ffa127383847ffc5318",
     freshAddress: "0xb8922507317d85197d70c2bc1afc949c759fd0a62c8841a4300d1e2b63649bf6",
   };
@@ -58,7 +57,8 @@ describe("createApi", () => {
           type: "native",
         },
         type: "send",
-        sender,
+        sender: sender.freshAddress,
+        senderPublicKey: sender.xpub,
         amount,
         recipient: recipient.freshAddress,
       });
@@ -71,13 +71,13 @@ describe("createApi", () => {
 
       const fees = await api.estimateFees({
         asset: {
-          type: "token",
-          standard: "coin",
-          contractAddress:
+          type: "coin",
+          assetReference:
             "0x50788befc1107c0cc4473848a92e5c783c635866ce3c98de71d2eeb7d2a34f85::usdc_coin::USDCoin",
         },
         type: "send",
-        sender,
+        sender: sender.freshAddress,
+        senderPublicKey: sender.xpub,
         amount,
         recipient: recipient.freshAddress,
       });
@@ -90,12 +90,12 @@ describe("createApi", () => {
 
       const fees = await api.estimateFees({
         asset: {
-          type: "token",
-          standard: "fungible_asset",
-          contractAddress: "0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b",
+          type: "fungible_asset",
+          assetReference: "0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b",
         },
         type: "send",
-        sender,
+        sender: sender.freshAddress,
+        senderPublicKey: sender.xpub,
         amount,
         recipient: recipient.freshAddress,
       });
@@ -109,12 +109,13 @@ describe("createApi", () => {
       const hex = await api.craftTransaction(
         {
           amount: 1n,
-          sender: sender,
+          sender: sender.freshAddress,
+          senderPublicKey: sender.xpub,
           recipient: recipient.freshAddress,
           type: "send",
           asset: { type: "native" },
         },
-        0n,
+        { value: 0n },
       );
 
       const rawTx = RawTransaction.deserialize(
@@ -130,17 +131,17 @@ describe("createApi", () => {
       const hex = await api.craftTransaction(
         {
           amount: 1n,
-          sender: sender,
+          sender: sender.freshAddress,
+          senderPublicKey: sender.xpub,
           recipient: recipient.freshAddress,
           type: "send",
           asset: {
-            type: "token",
-            standard: "coin",
-            contractAddress:
+            type: "coin",
+            assetReference:
               "0x50788befc1107c0cc4473848a92e5c783c635866ce3c98de71d2eeb7d2a34f85::aptos_coin::AptosCoin",
           },
         },
-        0n,
+        { value: 0n },
       );
 
       const rawTx = RawTransaction.deserialize(
@@ -156,17 +157,17 @@ describe("createApi", () => {
       const hex = await api.craftTransaction(
         {
           amount: 0n,
-          sender: sender,
+          sender: sender.freshAddress,
+          senderPublicKey: sender.xpub,
           recipient: recipient.freshAddress,
           type: "send",
           asset: {
-            type: "token",
-            standard: "coin",
-            contractAddress:
+            type: "coin",
+            assetReference:
               "0x50788befc1107c0cc4473848a92e5c783c635866ce3c98de71d2eeb7d2a34f85::aptos_coin::AptosCoin",
           },
         },
-        0n,
+        { value: 0n },
       );
 
       const rawTx = RawTransaction.deserialize(
@@ -184,16 +185,16 @@ describe("createApi", () => {
       const hex = await api.craftTransaction(
         {
           amount: 0n,
-          sender: s,
+          sender: s.freshAddress,
+          senderPublicKey: s.xpub,
           recipient: r.freshAddress,
           type: "send",
           asset: {
-            type: "token",
-            standard: "fungible_asset",
-            contractAddress: "0x2ebb2ccac5e027a87fa0e2e5f656a3a4238d6a48d93ec9b610d570fc0aa0df12",
+            type: "fungible_asset",
+            assetReference: "0x2ebb2ccac5e027a87fa0e2e5f656a3a4238d6a48d93ec9b610d570fc0aa0df12",
           },
         },
-        0n,
+        { value: 0n },
       );
 
       const rawTx = RawTransaction.deserialize(
@@ -219,7 +220,7 @@ describe("createApi", () => {
       const tokenBalances = balances.filter(
         b =>
           b.asset.type === assetTypeToken &&
-          b.asset.contractAddress ===
+          b.asset.assetReference ===
             "0x2ebb2ccac5e027a87fa0e2e5f656a3a4238d6a48d93ec9b610d570fc0aa0df12",
       );
       expect(tokenBalances.length).toBeGreaterThan(0);
@@ -339,9 +340,8 @@ describe("createApi", () => {
         recipients: [tokenAccount.freshAddress],
         senders: ["0x24dbf71ba20209753035505c51d4607ed67aa0c81b930d9ef4483ec84b349fcb"],
         asset: {
-          type: "token",
-          standard: "coin",
-          contractAddress:
+          type: "coin",
+          assetReference:
             "0xd11107bdf0d6d7040c6c0bfbdecb6545191fdf13e8d8d259952f53e1713f61b5::staked_coin::StakedAptos",
         },
         tx: {
@@ -358,9 +358,8 @@ describe("createApi", () => {
         recipients: ["0x24dbf71ba20209753035505c51d4607ed67aa0c81b930d9ef4483ec84b349fcb"],
         senders: [tokenAccount.freshAddress],
         asset: {
-          type: "token",
-          standard: "coin",
-          contractAddress:
+          type: "coin",
+          assetReference:
             "0xd11107bdf0d6d7040c6c0bfbdecb6545191fdf13e8d8d259952f53e1713f61b5::staked_coin::StakedAptos",
         },
         tx: {
@@ -382,9 +381,8 @@ describe("createApi", () => {
         recipients: [tokenAccount.freshAddress],
         senders: ["0x24dbf71ba20209753035505c51d4607ed67aa0c81b930d9ef4483ec84b349fcb"],
         asset: {
-          type: "token",
-          standard: "fungible_asset",
-          contractAddress: "0x2ebb2ccac5e027a87fa0e2e5f656a3a4238d6a48d93ec9b610d570fc0aa0df12",
+          type: "fungible_asset",
+          assetReference: "0x2ebb2ccac5e027a87fa0e2e5f656a3a4238d6a48d93ec9b610d570fc0aa0df12",
         },
         tx: {
           hash: "0x88856968603dee4f08579036bc30322b9a5f329561656888e3467ce27cc11ea7",
@@ -400,9 +398,8 @@ describe("createApi", () => {
         recipients: ["0x24dbf71ba20209753035505c51d4607ed67aa0c81b930d9ef4483ec84b349fcb"],
         senders: [tokenAccount.freshAddress],
         asset: {
-          type: "token",
-          standard: "fungible_asset",
-          contractAddress: "0x2ebb2ccac5e027a87fa0e2e5f656a3a4238d6a48d93ec9b610d570fc0aa0df12",
+          type: "fungible_asset",
+          assetReference: "0x2ebb2ccac5e027a87fa0e2e5f656a3a4238d6a48d93ec9b610d570fc0aa0df12",
         },
         tx: {
           hash: "0x8aa9e980760fe8aeb6804f387350b3019a2471aa61a5506a260c32cd5d6db32c",

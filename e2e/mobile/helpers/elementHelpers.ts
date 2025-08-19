@@ -222,9 +222,10 @@ export const WebElementHelpers = {
   },
 
   getWebElementsByIdAndText(id: string, text: string, index = 0): WebElement {
-    const base = web.element(
-      by.web.xpath(`//span[@data-testid="${id}" and text()="${text}"]`),
-    ) as IndexedWebElement;
+    const xpath = id
+      ? `//span[@data-testid="${id}" and text()="${text}"]`
+      : `//span[text()="${text}"]`;
+    const base = web.element(by.web.xpath(xpath)) as IndexedWebElement;
     return index > 0 ? base.atIndex(index) : base;
   },
 
@@ -253,7 +254,7 @@ export const WebElementHelpers = {
     while (Date.now() - start < timeout) {
       try {
         const elem = WebElementHelpers.getWebElementByTestId(id);
-        await retryUntilTimeout(() => elem.runScript(el => el.innerText), 1000, 200);
+        await retryUntilTimeout(() => elem.runScript(el => el.innerText), timeout);
         return elem;
       } catch (e) {
         lastErr = e instanceof Error ? e : new Error(String(e));
@@ -265,6 +266,10 @@ export const WebElementHelpers = {
 
   async tapWebElementByTestId(id: string, index = 0): Promise<void> {
     await retryUntilTimeout(async () => WebElementHelpers.getWebElementByTestId(id, index).tap());
+  },
+
+  async tapWebElementByElement(element: WebElement): Promise<void> {
+    await retryUntilTimeout(async () => element.tap());
   },
 
   async typeTextByWebTestId(id: string, text: string): Promise<void> {
@@ -282,5 +287,16 @@ export const WebElementHelpers = {
         [text],
       ),
     );
+  },
+
+  async getValueByWebTestId(id: string): Promise<string> {
+    const raw = await retryUntilTimeout(() =>
+      WebElementHelpers.getWebElementByTestId(id).runScript((el: HTMLInputElement) => el.value),
+    );
+
+    if (raw != null && typeof raw === "object" && "result" in raw) {
+      return String(raw["result"]);
+    }
+    return String(raw);
   },
 };

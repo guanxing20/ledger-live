@@ -1,5 +1,6 @@
 import network from "@ledgerhq/live-network";
 import { DEFAULT_OPTION, getCALDomain, type ServiceOption } from "./common";
+import { getEnv } from "@ledgerhq/live-env";
 
 const DeviceModel = {
   blue: "blue",
@@ -10,6 +11,7 @@ const DeviceModel = {
   /** Ledger Flex ("europa" is the internal name) */
   europa: "flex",
   flex: "flex",
+  apex: "apex",
 } as const;
 export type Device = keyof typeof DeviceModel;
 
@@ -59,7 +61,11 @@ export async function getCertificate(
   device: Device,
   usage: PublicKeyUsage,
   version: string | "latest" = "latest",
-  { env = "prod", signatureKind = "prod", ref = undefined }: ServiceOption = DEFAULT_OPTION,
+  {
+    env = "prod",
+    signatureKind = "prod",
+    ref = getEnv("CAL_REF") || undefined,
+  }: ServiceOption = DEFAULT_OPTION,
 ): Promise<CertificateInfo> {
   let params: Record<string, string | boolean | number | undefined> = {
     output: "id,target_device,not_valid_after,public_key_usage,certificate_version,descriptor",

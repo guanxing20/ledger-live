@@ -17,6 +17,7 @@ export default class AccountPage {
   accountSettingsButtonId = "account-settings-button";
   receiveButtonId = "account-quick-action-button-receive";
   sendButtonId = "account-quick-action-button-send";
+  swapButtonId = "account-quick-action-button-swap";
 
   accountGraph = (accountId: string) => getElementById(this.accountGraphId(accountId));
   accountBalance = (accountId: string) => getElementById(`account-balance-${accountId}`);
@@ -29,7 +30,7 @@ export default class AccountPage {
   getSpecificOperation = (operationType: string) =>
     getElementByIdAndText(this.operationRowRegexp, operationType, 0);
   subAccountId = (account: Account) =>
-    `js:2:${account.currency.id}:${account.parentAccount!.address}:${account.currency.id}Sub+${account.address}`;
+    `js:2:${account.currency.id}:${account.parentAccount ? account.parentAccount.address : account.address}:${account.currency.id}Sub+${account.address}`;
   accountGraphId = (accountId: string) => `account-graph-${accountId}`;
 
   @Step("Open accounts list via deeplink")
@@ -140,6 +141,12 @@ export default class AccountPage {
   async tapEarn() {
     await scrollToId(this.earnButtonId, this.accountScreenScrollView);
     await tapById(this.earnButtonId);
+  }
+
+  @Step("Tap on swap button")
+  async tapSwap() {
+    await scrollToId(this.swapButtonId, this.accountScreenScrollView);
+    await tapById(this.swapButtonId);
   }
 
   @Step("Navigate to token in account")
